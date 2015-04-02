@@ -1,12 +1,3 @@
-/*
- * --------------- Last change ------------------------
- * $HeadURL: http://svn:18080/svn/lexmark_apps/1/modules/LArchiveWSInterface/trunk/src/it/land/larchive/LArchiveClient.java $
- * $Id: LArchiveClient.java 39 2015-03-19 09:09:19Z rbracci $
- * $Date: 2015-03-19 10:09:19 +0100 (Thu, 19 Mar 2015) $
- * $Author: rbracci $
- * $Revision: 39 $
- * ----------------------------------------------------
- */
 package it.land;
 
 import it.land.responses.IsSignedResponse;
