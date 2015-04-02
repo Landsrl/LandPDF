@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://land.it" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://land.it" xmlns:intf="http://land.it" xmlns:tns1="http://responses.land.it" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://land.it" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://responses.land.it"/>
+   <element name="hasValidSignature">
+    <complexType>
+     <sequence>
+      <element name="pdf" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="hasValidSignatureResponse">
+    <complexType>
+     <sequence>
+      <element name="hasValidSignatureReturn" type="tns1:EnqueueResponse"/>
+     </sequence>
+    </complexType>
+   </element>
+   <complexType name="Error">
+    <sequence>
+     <element name="code" type="xsd:int"/>
+     <element name="description" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+   <element name="testMethod">
+    <complexType>
+     <sequence>
+      <element name="param" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="testMethodResponse">
+    <complexType>
+     <sequence>
+      <element name="testMethodReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+  </schema>
+  <schema elementFormDefault="qualified" targetNamespace="http://responses.land.it" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://land.it"/>
+   <complexType name="EnqueueResponse">
+    <sequence>
+     <element name="error" nillable="true" type="impl:Error"/>
+     <element name="response" nillable="true" type="xsd:string"/>
+    </sequence>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="hasValidSignatureRequest">
+
+      <wsdl:part element="impl:hasValidSignature" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="hasValidSignatureResponse">
+
+      <wsdl:part element="impl:hasValidSignatureResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="testMethodRequest">
+
+      <wsdl:part element="impl:testMethod" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="testMethodResponse">
+
+      <wsdl:part element="impl:testMethodResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:portType name="PdfService">
+
+      <wsdl:operation name="hasValidSignature">
+
+         <wsdl:input message="impl:hasValidSignatureRequest" name="hasValidSignatureRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:hasValidSignatureResponse" name="hasValidSignatureResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="testMethod">
+
+         <wsdl:input message="impl:testMethodRequest" name="testMethodRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:testMethodResponse" name="testMethodResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="PdfServiceSoapBinding" type="impl:PdfService">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="hasValidSignature">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="hasValidSignatureRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="hasValidSignatureResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="testMethod">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="testMethodRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="testMethodResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="PdfServiceService">
+
+      <wsdl:port binding="impl:PdfServiceSoapBinding" name="PdfService">
+
+         <wsdlsoap:address location="http://localhost:8080/LandPDF/services/PdfService"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>
