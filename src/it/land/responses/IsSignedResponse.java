@@ -2,6 +2,11 @@ package it.land.responses;
 
 import it.land.Error;
 
+/**
+ * 
+ * @author Riccardo Bracci
+ *
+ */
 public class IsSignedResponse
 {
 	private boolean response = false;

@@ -1,5 +1,10 @@
 package it.land;
 
+/**
+ * 
+ * @author Riccardo Bracci
+ *
+ */
 public class Error
 {
 

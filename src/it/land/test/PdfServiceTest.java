@@ -14,13 +14,18 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
+/**
+ * 
+ * @author Riccardo Bracci
+ *
+ */
 public class PdfServiceTest
 {
 
 	@Test
 	public void testTestMethod()
 	{
-		String SIGNED2 = "C:\\Users\\rbracci\\Desktop\\example_012.pdf";
+		String SIGNED2 = "C:\\Users\\rbracci\\Desktop\\BUDGET-2013-BUD.pdf";
 		String base64 = null;
 		try
 		{
