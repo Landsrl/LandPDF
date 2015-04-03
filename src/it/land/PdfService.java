@@ -183,14 +183,14 @@ public class PdfService
 			} catch (CertificateExpiredException e)
 			{
 				Error error = new Error();
-				error.setCode(10);
+				error.setCode(0);
 				error.setDescription(e.getMessage());
 				toReturn.setError(error);
 				return toReturn;
 			} catch (CertificateNotYetValidException e)
 			{
 				Error error = new Error();
-				error.setCode(11);
+				error.setCode(0);
 				error.setDescription(e.getMessage());
 				toReturn.setError(error);
 				return toReturn;
@@ -200,7 +200,7 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(0);
-			error.setDescription("OK");
+			error.setDescription("Not signed");
 			toReturn.setError(error);
 			toReturn.setResponse(false);
 			return toReturn;
