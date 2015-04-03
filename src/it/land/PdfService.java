@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -30,7 +29,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.security.CertificateVerification;
-import com.itextpdf.text.pdf.security.LtvVerifier;
 import com.itextpdf.text.pdf.security.PdfPKCS7;
 import com.itextpdf.text.pdf.security.VerificationException;
 
@@ -56,137 +54,6 @@ public class PdfService
 		ADOBE = this.getClass().getClassLoader()
 				.getResource("GeoTrust_CA_for_Adobe.pem").getPath();
 	}
-	
-	public IsSignedResponse isSigned(String pdf)
-	{
-		IsSignedResponse toReturn = new IsSignedResponse();
-		byte file[] = null;
-		try
-		{
-			file = DatatypeConverter.parseBase64Binary(pdf);
-		} catch (Exception e)
-		{
-			Error error = new Error();
-			error.setCode(1);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
-
-		Security.addProvider(new BouncyCastleProvider());
-		PdfReader reader = null;
-		try
-		{
-			reader = new PdfReader(file);
-		} catch (IOException e)
-		{
-			Error error = new Error();
-			error.setCode(2);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
-		KeyStore ks = null;
-		try
-		{
-			ks = KeyStore.getInstance(KeyStore.getDefaultType());
-		} catch (KeyStoreException e)
-		{
-			Error error = new Error();
-			error.setCode(3);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
-		try
-		{
-			ks.load(null, null);
-		} catch (NoSuchAlgorithmException e)
-		{
-			Error error = new Error();
-			error.setCode(4);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		} catch (CertificateException e)
-		{
-			Error error = new Error();
-			error.setCode(5);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		} catch (IOException e)
-		{
-			Error error = new Error();
-			error.setCode(2);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
-		CertificateFactory cf = null;
-		try
-		{
-			cf = CertificateFactory.getInstance("X.509");
-		} catch (CertificateException e)
-		{
-			Error error = new Error();
-			error.setCode(6);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
-		try
-		{
-			ks.setCertificateEntry("adobe",
-					cf.generateCertificate(new FileInputStream(ADOBE)));
-		} catch (KeyStoreException e)
-		{
-			Error error = new Error();
-			error.setCode(3);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		} catch (CertificateException e)
-		{
-			Error error = new Error();
-			error.setCode(6);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		} catch (FileNotFoundException e)
-		{
-			Error error = new Error();
-			error.setCode(7);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
-
-		try
-		{
-			LtvVerifier data = new LtvVerifier(reader);
-		} catch (GeneralSecurityException e)
-		{
-			Error error = new Error();
-			error.setCode(8);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		} catch (Exception e)
-		{
-			Error error = new Error();
-			error.setCode(8);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
-		Error error = new Error();
-		error.setCode(0);
-		error.setDescription("OK");
-		toReturn.setError(error);
-		toReturn.setResponse(true);
-		return toReturn;
-	}
 
 	public IsSignedResponse isValid(String pdf)
 	{
@@ -195,7 +62,7 @@ public class PdfService
 		try
 		{
 			file = DatatypeConverter.parseBase64Binary(pdf);
-		}catch (Exception e)
+		} catch (Exception e)
 		{
 			Error error = new Error();
 			error.setCode(1);
@@ -328,10 +195,15 @@ public class PdfService
 				toReturn.setError(error);
 				return toReturn;
 			}
-			// if (errors.size() == 0)
-			// out.println("Certificates verified against the KeyStore");
-			// else
-			// out.println(errors);
+		}
+		if (names.size() <= 0)
+		{
+			Error error = new Error();
+			error.setCode(0);
+			error.setDescription("OK");
+			toReturn.setError(error);
+			toReturn.setResponse(false);
+			return toReturn;
 		}
 		Error error = new Error();
 		error.setCode(0);
