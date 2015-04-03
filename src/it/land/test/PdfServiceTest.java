@@ -41,12 +41,17 @@ public class PdfServiceTest
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(System.getProperty("java.io.tmpdir"));
 		
 		PdfService service = new PdfService();
-		IsSignedResponse test2 = service.isValid(base64);
+		IsSignedResponse test2 = service.isSigned(base64);
 		System.out.println(test2.getResponse());
 		System.out.println(test2.getError().getCode() + ""+ test2.getError().getDescription());
+		if(test2.getResponse())
+		{
+			IsSignedResponse test = service.isValid(base64);
+			System.out.println(test.getResponse());
+			System.out.println(test.getError().getCode() + ""+ test.getError().getDescription());
+		}
 		assertNotNull(test2);
 	}
 
