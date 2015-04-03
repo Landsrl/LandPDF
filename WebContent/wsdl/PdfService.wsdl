@@ -5,17 +5,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
  <wsdl:types>
   <schema elementFormDefault="qualified" targetNamespace="http://land.it" xmlns="http://www.w3.org/2001/XMLSchema">
    <import namespace="http://responses.land.it"/>
-   <element name="hasValidSignature">
+   <element name="isValid">
     <complexType>
      <sequence>
       <element name="pdf" type="xsd:string"/>
      </sequence>
     </complexType>
    </element>
-   <element name="hasValidSignatureResponse">
+   <element name="isValidResponse">
     <complexType>
      <sequence>
-      <element name="hasValidSignatureReturn" type="tns1:EnqueueResponse"/>
+      <element name="isValidReturn" type="tns1:IsSignedResponse"/>
      </sequence>
     </complexType>
    </element>
@@ -25,59 +25,29 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
      <element name="description" nillable="true" type="xsd:string"/>
     </sequence>
    </complexType>
-   <element name="testMethod">
-    <complexType>
-     <sequence>
-      <element name="param" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
-   <element name="testMethodResponse">
-    <complexType>
-     <sequence>
-      <element name="testMethodReturn" type="xsd:string"/>
-     </sequence>
-    </complexType>
-   </element>
   </schema>
   <schema elementFormDefault="qualified" targetNamespace="http://responses.land.it" xmlns="http://www.w3.org/2001/XMLSchema">
    <import namespace="http://land.it"/>
-   <complexType name="EnqueueResponse">
+   <complexType name="IsSignedResponse">
     <sequence>
      <element name="error" nillable="true" type="impl:Error"/>
-     <element name="response" nillable="true" type="xsd:string"/>
+     <element name="response" type="xsd:boolean"/>
     </sequence>
    </complexType>
   </schema>
  </wsdl:types>
 
-   <wsdl:message name="hasValidSignatureRequest">
+   <wsdl:message name="isValidResponse">
 
-      <wsdl:part element="impl:hasValidSignature" name="parameters">
-
-      </wsdl:part>
-
-   </wsdl:message>
-
-   <wsdl:message name="hasValidSignatureResponse">
-
-      <wsdl:part element="impl:hasValidSignatureResponse" name="parameters">
+      <wsdl:part element="impl:isValidResponse" name="parameters">
 
       </wsdl:part>
 
    </wsdl:message>
 
-   <wsdl:message name="testMethodRequest">
+   <wsdl:message name="isValidRequest">
 
-      <wsdl:part element="impl:testMethod" name="parameters">
-
-      </wsdl:part>
-
-   </wsdl:message>
-
-   <wsdl:message name="testMethodResponse">
-
-      <wsdl:part element="impl:testMethodResponse" name="parameters">
+      <wsdl:part element="impl:isValid" name="parameters">
 
       </wsdl:part>
 
@@ -85,25 +55,13 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
    <wsdl:portType name="PdfService">
 
-      <wsdl:operation name="hasValidSignature">
+      <wsdl:operation name="isValid">
 
-         <wsdl:input message="impl:hasValidSignatureRequest" name="hasValidSignatureRequest">
-
-       </wsdl:input>
-
-         <wsdl:output message="impl:hasValidSignatureResponse" name="hasValidSignatureResponse">
-
-       </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="testMethod">
-
-         <wsdl:input message="impl:testMethodRequest" name="testMethodRequest">
+         <wsdl:input message="impl:isValidRequest" name="isValidRequest">
 
        </wsdl:input>
 
-         <wsdl:output message="impl:testMethodResponse" name="testMethodResponse">
+         <wsdl:output message="impl:isValidResponse" name="isValidResponse">
 
        </wsdl:output>
 
@@ -115,35 +73,17 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
 
       <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
 
-      <wsdl:operation name="hasValidSignature">
+      <wsdl:operation name="isValid">
 
          <wsdlsoap:operation soapAction=""/>
 
-         <wsdl:input name="hasValidSignatureRequest">
+         <wsdl:input name="isValidRequest">
 
             <wsdlsoap:body use="literal"/>
 
          </wsdl:input>
 
-         <wsdl:output name="hasValidSignatureResponse">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:output>
-
-      </wsdl:operation>
-
-      <wsdl:operation name="testMethod">
-
-         <wsdlsoap:operation soapAction=""/>
-
-         <wsdl:input name="testMethodRequest">
-
-            <wsdlsoap:body use="literal"/>
-
-         </wsdl:input>
-
-         <wsdl:output name="testMethodResponse">
+         <wsdl:output name="isValidResponse">
 
             <wsdlsoap:body use="literal"/>
 
