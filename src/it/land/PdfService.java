@@ -10,15 +10,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 import java.util.Properties;
 
 import javax.xml.bind.DatatypeConverter;
@@ -28,9 +25,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.security.CertificateVerification;
 import com.itextpdf.text.pdf.security.PdfPKCS7;
-import com.itextpdf.text.pdf.security.VerificationException;
 
 /**
  * 
@@ -172,10 +167,6 @@ public class PdfService
 		for (String name : names)
 		{
 			PdfPKCS7 pk = af.verifySignature(name);
-			Calendar cal = pk.getSignDate();
-			Certificate[] pkc = pk.getCertificates();
-			List<VerificationException> errors = CertificateVerification
-					.verifyCertificates(pkc, ks, null, cal);
 			X509Certificate cert = (X509Certificate) pk.getSigningCertificate();
 			try
 			{
