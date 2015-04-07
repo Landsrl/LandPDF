@@ -1,6 +1,6 @@
 package it.land;
 
-import it.land.responses.IsSignedResponse;
+import it.land.responses.IsValidResponse;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -55,9 +55,9 @@ public class PdfService
 				.getResource("GeoTrust_CA_for_Adobe.pem").getPath();
 	}
 
-	public IsSignedResponse isValid(String pdf)
+	public IsValidResponse isValid(String pdf)
 	{
-		IsSignedResponse toReturn = new IsSignedResponse();
+		IsValidResponse toReturn = new IsValidResponse();
 		byte file[] = null;
 		try
 		{
@@ -186,6 +186,8 @@ public class PdfService
 				error.setCode(0);
 				error.setDescription(e.getMessage());
 				toReturn.setError(error);
+				toReturn.setIsSigned(true);
+				toReturn.setIsValid(false);
 				return toReturn;
 			} catch (CertificateNotYetValidException e)
 			{
@@ -193,6 +195,8 @@ public class PdfService
 				error.setCode(0);
 				error.setDescription(e.getMessage());
 				toReturn.setError(error);
+				toReturn.setIsSigned(true);
+				toReturn.setIsValid(false);
 				return toReturn;
 			}
 		}
@@ -200,16 +204,18 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(0);
-			error.setDescription("Not signed");
+			error.setDescription("OK");
 			toReturn.setError(error);
-			toReturn.setResponse(false);
+			toReturn.setIsSigned(false);
+			toReturn.setIsValid(false);
 			return toReturn;
 		}
 		Error error = new Error();
 		error.setCode(0);
 		error.setDescription("OK");
 		toReturn.setError(error);
-		toReturn.setResponse(true);
+		toReturn.setIsSigned(true);
+		toReturn.setIsValid(true);
 		return toReturn;
 	}
 

@@ -2,7 +2,7 @@ package it.land.test;
 
 import static org.junit.Assert.assertNotNull;
 import it.land.PdfService;
-import it.land.responses.IsSignedResponse;
+import it.land.responses.IsValidResponse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +25,7 @@ public class PdfServiceTest
 	@Test
 	public void testTestMethod()
 	{
-		String SIGNED2 = "C:\\Users\\rbracci\\Desktop\\BUDGET-2013-BUD.pdf";
+		String SIGNED2 = "C:\\Users\\rbracci\\Desktop\\example_012.pdf";
 		String base64 = null;
 		try
 		{
@@ -41,12 +41,14 @@ public class PdfServiceTest
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		PdfService service = new PdfService();
-			IsSignedResponse test = service.isValid(base64);
-			System.out.println(test.getResponse());
-			System.out.println(test.getError().getCode() + ""+ test.getError().getDescription());
-		
+		IsValidResponse test = service.isValid(base64);
+		System.out.println(test.getIsSigned());
+		System.out.println(test.getIsValid());
+		System.out.println(test.getError().getCode() + ""
+				+ test.getError().getDescription());
+
 		assertNotNull(test);
 	}
 
