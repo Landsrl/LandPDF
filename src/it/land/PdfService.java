@@ -1,31 +1,47 @@
 package it.land;
 
 import it.land.responses.IsValidResponse;
+import it.land.responses.SignedPdfResponse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Properties;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.log.SysoCounter;
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfSignatureAppearance;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.security.BouncyCastleDigest;
+import com.itextpdf.text.pdf.security.ExternalDigest;
+import com.itextpdf.text.pdf.security.ExternalSignature;
+import com.itextpdf.text.pdf.security.MakeSignature;
+import com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard;
 import com.itextpdf.text.pdf.security.PdfPKCS7;
+import com.itextpdf.text.pdf.security.PrivateKeySignature;
 
 /**
  * 
@@ -35,7 +51,7 @@ import com.itextpdf.text.pdf.security.PdfPKCS7;
 public class PdfService
 {
 
-	private String ADOBE = null;
+	private String certificate = null;
 
 	public PdfService()
 	{
@@ -46,14 +62,17 @@ public class PdfService
 		{
 			System.out.println(e.getMessage());
 		}
-		ADOBE = this.getClass().getClassLoader()
-				.getResource("GeoTrust_CA_for_Adobe.pem").getPath();
+		
 	}
 
 	public IsValidResponse isValid(byte[] pdf)
 	{
 		IsValidResponse toReturn = new IsValidResponse();
 		Security.addProvider(new BouncyCastleProvider());
+		
+		certificate = this.getClass().getClassLoader()
+				.getResource("GeoTrust_CA_for_Adobe.pem").getPath();
+		
 		KeyStore ks = null;
 		try
 		{
@@ -61,7 +80,7 @@ public class PdfService
 		} catch (KeyStoreException e)
 		{
 			Error error = new Error();
-			error.setCode(1);
+			error.setCode(1001);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -72,21 +91,21 @@ public class PdfService
 		} catch (NoSuchAlgorithmException e)
 		{
 			Error error = new Error();
-			error.setCode(2);
+			error.setCode(1002);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		} catch (CertificateException e)
 		{
 			Error error = new Error();
-			error.setCode(3);
+			error.setCode(1003);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		} catch (IOException e)
 		{
 			Error error = new Error();
-			error.setCode(4);
+			error.setCode(1004);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -98,7 +117,7 @@ public class PdfService
 		} catch (CertificateException e)
 		{
 			Error error = new Error();
-			error.setCode(5);
+			error.setCode(1005);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -106,11 +125,11 @@ public class PdfService
 		FileInputStream is1 = null;
 		try
 		{
-			is1 = new FileInputStream(ADOBE);
+			is1 = new FileInputStream(certificate);
 		} catch (FileNotFoundException e)
 		{
 			Error error = new Error();
-			error.setCode(6);
+			error.setCode(1006);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -122,7 +141,7 @@ public class PdfService
 		} catch (CertificateException e)
 		{
 			Error error = new Error();
-			error.setCode(7);
+			error.setCode(1007);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -133,7 +152,7 @@ public class PdfService
 		} catch (KeyStoreException e)
 		{
 			Error error = new Error();
-			error.setCode(8);
+			error.setCode(1008);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -145,7 +164,7 @@ public class PdfService
 		} catch (IOException e)
 		{
 			Error error = new Error();
-			error.setCode(9);
+			error.setCode(1009);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -198,6 +217,226 @@ public class PdfService
 		return toReturn;
 	}
 
+	
+	
+	public SignedPdfResponse sign(String certname, String pin, byte[] pdf)
+	{
+		SignedPdfResponse toReturn = new SignedPdfResponse();
+		Security.addProvider(new BouncyCastleProvider());
+		
+		certificate = certname;
+
+		KeyStore ks = null;
+		try
+		{
+			ks = KeyStore.getInstance("PKCS12");
+		} catch (KeyStoreException e)
+		{
+			Error error = new Error();
+			error.setCode(2001);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
+		try
+		{
+			ks.load(new FileInputStream(certificate), pin.toCharArray());
+		} catch (NoSuchAlgorithmException e)
+		{
+			Error error = new Error();
+			error.setCode(2002);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		} catch (CertificateException e)
+		{
+			Error error = new Error();
+			error.setCode(2003);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		} catch (IOException e)
+		{
+			Error error = new Error();
+			error.setCode(2004);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+	
+		Enumeration<String> aliases = null;
+		try
+		{
+			aliases = ks.aliases();
+		}
+		catch (KeyStoreException e)
+		{
+			Error error = new Error();
+			error.setCode(2005);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+				
+		Certificate cert1 = null;
+		
+		Certificate[] chain = null;
+		
+		PrivateKey pk = null;
+		
+		try
+		{
+			if(aliases.hasMoreElements()) 
+			{
+				String alias = (String) aliases.nextElement();
+				
+				cert1 = ks.getCertificate(alias);
+				
+				chain = ks.getCertificateChain(alias);
+				
+				pk = (PrivateKey) ks.getKey(alias, pin.toCharArray());
+
+			}
+		} 
+		catch (KeyStoreException e)
+		{
+			Error error = new Error();
+			error.setCode(2006);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		catch (UnrecoverableKeyException e)
+		{
+			Error error = new Error();
+			error.setCode(2007);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			Error error = new Error();
+			error.setCode(2008);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+
+		PdfReader reader = null;
+		try
+		{
+			reader = new PdfReader(pdf);
+		} catch (IOException e)
+		{
+			Error error = new Error();
+			error.setCode(2009);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		
+		PdfStamper stp = null;
+        try 
+        {
+        	System.out.println("Creo la firma");
+        	stp = PdfStamper.createSignature(reader, bos, '\0', null, true);
+        }
+        catch (DocumentException e)
+        {
+        	Error error = new Error();
+			error.setCode(2010);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+        }
+        catch (IOException e)
+        {
+        	Error error = new Error();
+			error.setCode(2011);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+        }
+        
+        PdfSignatureAppearance sap = stp.getSignatureAppearance();
+                
+		sap.setCertificate(cert1);
+		
+        sap.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
+         
+	
+		
+		ExternalSignature es = new PrivateKeySignature(pk, "SHA-256", "BC");
+        ExternalDigest digest = new BouncyCastleDigest();
+        try
+		{
+			MakeSignature.signDetached(sap, digest, es, chain, null, null, null, 0, CryptoStandard.CMS);
+		}
+		catch (IOException e)
+		{
+			Error error = new Error();
+			error.setCode(2012);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		catch (DocumentException e)
+		{
+			Error error = new Error();
+			error.setCode(2013);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		catch (GeneralSecurityException e)
+		{
+			Error error = new Error();
+			error.setCode(2014);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
+        try
+		{
+        	
+			stp.close();
+		}
+		catch (DocumentException e)
+		{
+			Error error = new Error();
+			error.setCode(2015);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		catch (IOException e)
+		{
+			Error error = new Error();
+			error.setCode(2016);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+        
+		System.out.println("length: "+bos.toByteArray().length); 
+		
+        toReturn.setSignedPdf(bos.toByteArray());
+        Error error = new Error();
+		error.setCode(0);
+		error.setDescription("OK");
+        toReturn.setError(error);
+        
+        
+		return toReturn;
+	}
+	
+
+	
 	/**
 	 * Attiva il log della classe
 	 * 
