@@ -25,12 +25,13 @@ public class PdfServiceTest
 	@Test
 	public void testTestMethod()
 	{
-		String SIGNED2 = "C:\\Users\\rbracci\\Desktop\\example_012.pdf";
+		String SIGNED2 = "C:\\Users\\rbracci\\Desktop\\BUDGET-2013-BUD.pdf";
 		String base64 = null;
+		byte[] bytes = null;
 		try
 		{
 			FileInputStream fis = new FileInputStream(new File(SIGNED2));
-			byte[] bytes = IOUtils.toByteArray(fis);
+			bytes = IOUtils.toByteArray(fis);
 			base64 = DatatypeConverter.printBase64Binary(bytes);
 		} catch (FileNotFoundException e)
 		{
@@ -43,7 +44,7 @@ public class PdfServiceTest
 		}
 
 		PdfService service = new PdfService();
-		IsValidResponse test = service.isValid(base64);
+		IsValidResponse test = service.isValid(bytes);
 		System.out.println(test.getIsSigned());
 		System.out.println(test.getIsValid());
 		System.out.println(test.getError().getCode() + ""

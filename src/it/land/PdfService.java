@@ -50,21 +50,9 @@ public class PdfService
 				.getResource("GeoTrust_CA_for_Adobe.pem").getPath();
 	}
 
-	public IsValidResponse isValid(String pdf)
+	public IsValidResponse isValid(byte[] pdf)
 	{
 		IsValidResponse toReturn = new IsValidResponse();
-		byte file[] = null;
-		try
-		{
-			file = DatatypeConverter.parseBase64Binary(pdf);
-		} catch (Exception e)
-		{
-			Error error = new Error();
-			error.setCode(1);
-			error.setDescription(e.getMessage());
-			toReturn.setError(error);
-			return toReturn;
-		}
 		Security.addProvider(new BouncyCastleProvider());
 		KeyStore ks = null;
 		try
@@ -153,7 +141,7 @@ public class PdfService
 		PdfReader reader = null;
 		try
 		{
-			reader = new PdfReader(file);
+			reader = new PdfReader(pdf);
 		} catch (IOException e)
 		{
 			Error error = new Error();
