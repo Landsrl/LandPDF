@@ -4,6 +4,7 @@ import it.land.responses.IsValidResponse;
 import it.land.responses.SignedPdfResponse;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,7 +31,6 @@ import org.apache.log4j.PropertyConfigurator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.log.SysoCounter;
 import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
@@ -224,8 +224,34 @@ public class PdfService
 		SignedPdfResponse toReturn = new SignedPdfResponse();
 		Security.addProvider(new BouncyCastleProvider());
 		
-		certificate = certname;
-
+		Properties properties = new Properties();
+		
+		try
+		{
+			properties.load(this.getClass().getResourceAsStream("/pdfservice.properties"));
+		}
+		catch (IOException e)
+		{
+			Error error = new Error();
+			error.setCode(2001);
+			error.setDescription(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
+		String certificatePath = properties.getProperty("certificate_path");
+		
+		if(certificatePath != null)
+		{
+			certificate = certificatePath+File.separator+certname;
+		}
+		else
+		{
+			certificate = certname;
+		}
+			
+			
+			
 		KeyStore ks = null;
 		try
 		{
@@ -233,7 +259,7 @@ public class PdfService
 		} catch (KeyStoreException e)
 		{
 			Error error = new Error();
-			error.setCode(2001);
+			error.setCode(2002);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -245,21 +271,21 @@ public class PdfService
 		} catch (NoSuchAlgorithmException e)
 		{
 			Error error = new Error();
-			error.setCode(2002);
+			error.setCode(2003);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		} catch (CertificateException e)
 		{
 			Error error = new Error();
-			error.setCode(2003);
+			error.setCode(2004);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		} catch (IOException e)
 		{
 			Error error = new Error();
-			error.setCode(2004);
+			error.setCode(2005);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -273,7 +299,7 @@ public class PdfService
 		catch (KeyStoreException e)
 		{
 			Error error = new Error();
-			error.setCode(2005);
+			error.setCode(2006);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -302,7 +328,7 @@ public class PdfService
 		catch (KeyStoreException e)
 		{
 			Error error = new Error();
-			error.setCode(2006);
+			error.setCode(2007);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -310,7 +336,7 @@ public class PdfService
 		catch (UnrecoverableKeyException e)
 		{
 			Error error = new Error();
-			error.setCode(2007);
+			error.setCode(2008);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -318,7 +344,7 @@ public class PdfService
 		catch (NoSuchAlgorithmException e)
 		{
 			Error error = new Error();
-			error.setCode(2008);
+			error.setCode(2009);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -331,7 +357,7 @@ public class PdfService
 		} catch (IOException e)
 		{
 			Error error = new Error();
-			error.setCode(2009);
+			error.setCode(2010);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -348,7 +374,7 @@ public class PdfService
         catch (DocumentException e)
         {
         	Error error = new Error();
-			error.setCode(2010);
+			error.setCode(2011);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -356,7 +382,7 @@ public class PdfService
         catch (IOException e)
         {
         	Error error = new Error();
-			error.setCode(2011);
+			error.setCode(2012);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -379,7 +405,7 @@ public class PdfService
 		catch (IOException e)
 		{
 			Error error = new Error();
-			error.setCode(2012);
+			error.setCode(2013);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -387,7 +413,7 @@ public class PdfService
 		catch (DocumentException e)
 		{
 			Error error = new Error();
-			error.setCode(2013);
+			error.setCode(2014);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -395,7 +421,7 @@ public class PdfService
 		catch (GeneralSecurityException e)
 		{
 			Error error = new Error();
-			error.setCode(2014);
+			error.setCode(2015);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -409,7 +435,7 @@ public class PdfService
 		catch (DocumentException e)
 		{
 			Error error = new Error();
-			error.setCode(2015);
+			error.setCode(2016);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
@@ -417,7 +443,7 @@ public class PdfService
 		catch (IOException e)
 		{
 			Error error = new Error();
-			error.setCode(2016);
+			error.setCode(2017);
 			error.setDescription(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
