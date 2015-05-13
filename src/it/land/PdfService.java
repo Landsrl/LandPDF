@@ -1,5 +1,6 @@
 package it.land;
 
+
 import it.land.responses.IsValidResponse;
 import it.land.responses.SignedPdfResponse;
 
@@ -13,7 +14,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
@@ -218,10 +218,46 @@ public class PdfService
 	}
 
 	
-	
+	/**
+	 * Sign the pdf
+	 * 
+	 * @param certname Name of the P12 certificate
+	 * @param pin Pin of the certificate
+	 * @param pdf Buffer of the Pdf
+	 * @return The response composed by an Error object (that has a status and reason) and the signed Pdf 
+	 */
 	public SignedPdfResponse sign(String certname, String pin, byte[] pdf)
 	{
 		SignedPdfResponse toReturn = new SignedPdfResponse();
+		
+		if(	(certname == null) || (certname.trim().equals("")))
+		{
+			Error error = new Error();
+			error.setCode(2100);
+			error.setDescription("Nessun nome del certificato da usare ricevuto in input alla request. Si prega di verificare.");
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
+		if(	(pin == null) || (pin.trim().equals("")))
+		{
+			Error error = new Error();
+			error.setCode(2101);
+			error.setDescription("Nessun pin del certificato ricevuto in input alla request. Si prega di verificare.");
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
+		if(	(pdf == null) || (pdf.length == 0))
+		{
+			Error error = new Error();
+			error.setCode(2102);
+			error.setDescription("Nessun pdf ricevuto in input alla request. Si prega di verificare.");
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
+		
 		Security.addProvider(new BouncyCastleProvider());
 		
 		Properties properties = new Properties();
