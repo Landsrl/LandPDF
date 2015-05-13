@@ -285,6 +285,15 @@ public class PdfService
 		{
 			certificate = certname;
 		}
+		
+		if(!new File(certificate).canRead())
+		{
+			Error error = new Error();
+			error.setCode(2200);
+			error.setDescription("Non risulta possibile leggere il file "+certificate+". Verificare che il file esista e si abbiano i permessi di lettura.");
+			toReturn.setError(error);
+			return toReturn;
+		}
 			
 			
 			
