@@ -68,6 +68,17 @@ public class PdfService
 	public IsValidResponse isValid(byte[] pdf)
 	{
 		IsValidResponse toReturn = new IsValidResponse();
+		
+		
+		if(	(pdf == null) || (pdf.length == 0))
+		{
+			Error error = new Error();
+			error.setCode(1009);
+			error.setDescription("Nessun pdf ricevuto in input alla request. Si prega di verificare.");
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
 		Security.addProvider(new BouncyCastleProvider());
 		
 		certificate = this.getClass().getClassLoader()
