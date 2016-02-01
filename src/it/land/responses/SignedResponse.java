@@ -10,7 +10,7 @@ import it.land.Error;
  * @author mcosta
  *
  */
-public class SignedPdfResponse
+public class SignedResponse
 {
 	private byte[] signedPdf = null;
 	
