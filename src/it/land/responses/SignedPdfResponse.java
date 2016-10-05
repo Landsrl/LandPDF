@@ -10,26 +10,26 @@ import it.land.Error;
  * @author mcosta
  *
  */
-public class SignedResponse
+public class SignedPdfResponse
 {
-	private byte[] signed = null;
+	private byte[] signedPdf = null;
 	
 	private Error error = null;
 
 	/**
-	 * @return the signed
+	 * @return the signedPdf
 	 */
-	public byte[] getSigned()
+	public byte[] getSignedPdf()
 	{
-		return signed;
+		return signedPdf;
 	}
 
 	/**
-	 * @param signed the signed to set
+	 * @param signedPdf the signedPdf to set
 	 */
-	public void setSigned(byte[] signed)
+	public void setSignedPdf(byte[] signedPdf)
 	{
-		this.signed = signed;
+		this.signedPdf = signedPdf;
 	}
 
 	/**

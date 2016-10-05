@@ -94,7 +94,7 @@ public class PdfServiceTest
 		
 		SignedResponse response = service.signPdf(certname, pin, pdf);
 		
-		byte[] signed = response.getSignedPdf();
+		byte[] signed = response.getSigned();
 		
 		System.out.println("Code: "+response.getError().getCode());
 		
@@ -167,9 +167,9 @@ public class PdfServiceTest
 		
 		
 		
-		SignedResponse response = service.signCades(certname, pin, pdf);
+		SignedResponse response = service.signBuffer(certname, pin, pdf);
 		
-		byte[] signed = response.getSignedPdf();
+		byte[] signed = response.getSigned();
 		
 		System.out.println("Code: "+response.getError().getCode());
 		

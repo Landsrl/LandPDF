@@ -10,16 +10,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Security;
-import java.security.Signature;
-import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -78,6 +75,8 @@ public class PdfService
 	private boolean isPades = false;
 	
 	private boolean isCades = false;
+	
+	private boolean isLast = false;
 
 	public PdfService()
 	{
@@ -101,14 +100,28 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1009);
 			error.setDescription("Nessun pdf ricevuto in input alla request. Si prega di verificare.");
+			logger.error("Nessun pdf ricevuto in input alla request. Si prega di verificare.");
 			toReturn.setError(error);
 			return toReturn;
 		}
 		
 		Security.addProvider(new BouncyCastleProvider());
 		
-		certificate = this.getClass().getClassLoader()
-				.getResource("GeoTrust_CA_for_Adobe.pem").getPath();
+		try
+		{
+			certificate = this.getClass().getClassLoader()
+					.getResource("GeoTrust_CA_for_Adobe.pem").toURI().getPath();
+		}
+		catch (URISyntaxException e)
+		{
+			Error error = new Error();
+			error.setCode(1010);
+			error.setDescription("Impossibile ricavare la url del file \"GeoTrust_CA_for_Adobe.pem\". Si prega di verificare.");
+			logger.error(e.getMessage());
+			toReturn.setError(error);
+			return toReturn;
+		}
+		
 		
 		KeyStore ks = null;
 		try
@@ -119,6 +132,7 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1001);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -130,13 +144,15 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1002);
 			error.setDescription(e.getMessage());
-			toReturn.setError(error);
+			logger.error(e.getMessage());
+			toReturn.setError(error);			
 			return toReturn;
 		} catch (CertificateException e)
 		{
 			Error error = new Error();
 			error.setCode(1003);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		} catch (IOException e)
@@ -144,6 +160,7 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1004);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -156,6 +173,7 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1005);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -168,6 +186,7 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1006);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -180,6 +199,7 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1007);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -191,9 +211,14 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1008);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		}
+		
+		logger.info("Certificato CA caricato correttamente.");
+		
+		
 		PdfReader reader = null;
 		try
 		{
@@ -203,15 +228,20 @@ public class PdfService
 			Error error = new Error();
 			error.setCode(1009);
 			error.setDescription(e.getMessage());
+			logger.error(e.getMessage());
 			toReturn.setError(error);
 			return toReturn;
 		}
+		
+		logger.info("Pdf verificato correttamente.");
+		
 		AcroFields af = reader.getAcroFields();
 		ArrayList<String> names = af.getSignatureNames();
 		for (String name : names)
 		{
 			PdfPKCS7 pk = af.verifySignature(name);
 			X509Certificate cert = (X509Certificate) pk.getSigningCertificate();
+						
 			try
 			{
 				cert.checkValidity();
@@ -223,6 +253,9 @@ public class PdfService
 				toReturn.setError(error);
 				toReturn.setIsSigned(true);
 				toReturn.setIsValid(false);
+				
+				logger.info("Il pdf risulta firmato ma la firma non e' valida.");
+				
 				return toReturn;
 			} catch (CertificateNotYetValidException e)
 			{
@@ -232,6 +265,9 @@ public class PdfService
 				toReturn.setError(error);
 				toReturn.setIsSigned(true);
 				toReturn.setIsValid(false);
+				
+				logger.info("Il pdf risulta firmato ma la firma non e' valida.");
+				
 				return toReturn;
 			}
 		}
@@ -243,6 +279,9 @@ public class PdfService
 			toReturn.setError(error);
 			toReturn.setIsSigned(false);
 			toReturn.setIsValid(false);
+			
+			logger.info("Il pdf risulta non firmato e la firma non e' valida.");
+			
 			return toReturn;
 		}
 		Error error = new Error();
@@ -251,6 +290,9 @@ public class PdfService
 		toReturn.setError(error);
 		toReturn.setIsSigned(true);
 		toReturn.setIsValid(true);
+		
+		logger.info("Il pdf risulta firmato e la firma e' valida.");
+		
 		return toReturn;
 	}
 
@@ -266,7 +308,31 @@ public class PdfService
 	public SignedResponse signPdf(String certname, String pin, byte[] pdf)
 	{
 		isPades = true;
-		return this.innerSign(certname, pin, pdf);
+		isLast = false;
+		SignedResponse response = this.innerSign(certname, pin, pdf);
+		
+		logger.info("Status: " + response.getError().getCode());
+		logger.info("Reason: " + response.getError().getDescription());
+		return response; 
+	}
+	
+	/**
+	 * Make a PAdES
+	 * 
+	 * @param certname Name of the P12 certificate
+	 * @param pin Pin of the certificate
+	 * @param pdf Pdf to sign
+	 * @return The response composed by an Error object (that has a status and reason) and the PAdES 
+	 */
+	public SignedResponse signAndFinalizePdf(String certname, String pin, byte[] pdf)
+	{
+		isPades = true;
+		isLast = true;
+		SignedResponse response = this.innerSign(certname, pin, pdf);
+		
+		logger.info("Status: " + response.getError().getCode());
+		logger.info("Reason: " + response.getError().getDescription());
+		return response; 
 	}
 	
 	/**
@@ -277,10 +343,14 @@ public class PdfService
 	 * @param buffer Buffer to sign
 	 * @return The response composed by an Error object (that has a status and reason) and the CAdES
 	 */
-	public SignedResponse signCades(String certname, String pin, byte[] buffer)
+	public SignedResponse signBuffer(String certname, String pin, byte[] buffer)
 	{		
 		isCades = true;
-		return innerSign(certname, pin, buffer);
+		SignedResponse response = this.innerSign(certname, pin, buffer);
+		
+		logger.info("Status: " + response.getError().getCode());
+		logger.info("Reason: " + response.getError().getDescription());
+		return response;
 	}
 	
 	
@@ -289,7 +359,7 @@ public class PdfService
 	{
 		long start = System.currentTimeMillis();
 		
-		logger.info("Inizio metodo di firma pdf");		
+		logger.info("Inizio metodo di firma");	
 		logger.info("La chiamata e' arrivata dal seguente IP: " + (String) (MessageContext.getCurrentMessageContext()).getProperty(MessageContext.REMOTE_ADDR));
 		
 		SignedResponse toReturn = new SignedResponse();
@@ -356,7 +426,7 @@ public class PdfService
 			certificate = certname;
 		}
 		
-		logger.debug("Il certificato ricercato e' " + certificate);
+		logger.debug("Il certificato ricercato e' " + certificate + ". E' possibile leggerlo? " + new File(certificate).canRead());
 		
 		if(!new File(certificate).canRead())
 		{
@@ -377,11 +447,11 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(2100);
-			error.setDescription(e.getMessage());
+			error.setDescription("Nessun provider di tipo PKCS12 .");
 			toReturn.setError(error);
 			return toReturn;
 		}
-		
+			
 		try
 		{
 			ks.load(new FileInputStream(certificate), pin.toCharArray());
@@ -389,21 +459,21 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(2101);
-			error.setDescription(e.getMessage());
+			error.setDescription("Nessun algoritmo trovato per verificare l'integrita' del certificato in fase di caricamento del keystore.");
 			toReturn.setError(error);
 			return toReturn;
 		} catch (CertificateException e)
 		{
 			Error error = new Error();
 			error.setCode(2102);
-			error.setDescription(e.getMessage());
+			error.setDescription("Impossibile caricare il certificato nel keystore.");
 			toReturn.setError(error);
 			return toReturn;
 		} catch (IOException e)
 		{
 			Error error = new Error();
 			error.setCode(2103);
-			error.setDescription(e.getMessage());
+			error.setDescription("Problemi di lettura del certificato. Verificare che il certificato esista, abbia un formato corretto e che il pin usato sia corretto.");
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -419,7 +489,7 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(2104);
-			error.setDescription(e.getMessage());
+			error.setDescription("Keystore non inizializzato in fase di lettura degli alias.");
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -448,7 +518,7 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(2105);
-			error.setDescription(e.getMessage());
+			error.setDescription("Keystore non inizializzato in fase di recupero del certificato pubblico e della chiave privata.");
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -456,7 +526,7 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(2106);
-			error.setDescription(e.getMessage());
+			error.setDescription("Impossibile recuperare la chiave dal certificato in fase di recupero del certificato pubblico e della chiave privata.");
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -464,7 +534,7 @@ public class PdfService
 		{
 			Error error = new Error();
 			error.setCode(2107);
-			error.setDescription(e.getMessage());
+			error.setDescription("Nessun algoritmo trovato per verificare l'integrita' del certificato in fase di recupero del certificato pubblico e della chiave privata.");
 			toReturn.setError(error);
 			return toReturn;
 		}
@@ -473,6 +543,7 @@ public class PdfService
 		
 		if(isPades)
 		{
+			logger.info("Verra' creata una PAdES.");
 			try
 			{
 				signedbuffer = innerPAdES(buffer, pk, cert1, chain);
@@ -481,7 +552,7 @@ public class PdfService
 			{
 				Error error = new Error();
 				error.setCode(2200);
-				error.setDescription(e.getMessage());
+				error.setDescription("Errore di lettura del pdf. Verificare che il pdf sia corretto.");
 				toReturn.setError(error);
 				return toReturn;
 			}
@@ -489,7 +560,7 @@ public class PdfService
 			{
 				Error error = new Error();
 				error.setCode(2201);
-				error.setDescription(e.getMessage());
+				error.setDescription("Errore in fase di manipolazione del pdf.");
 				toReturn.setError(error);
 				return toReturn;
 			}
@@ -497,7 +568,7 @@ public class PdfService
 			{
 				Error error = new Error();
 				error.setCode(2202);
-				error.setDescription(e.getMessage());
+				error.setDescription("Errore di apposizione della firma nel pdf.");
 				toReturn.setError(error);
 				return toReturn;
 			}
@@ -505,47 +576,16 @@ public class PdfService
 		
 		if(isCades)
 		{
+			logger.info("Verra' creata una CAdES.");
 			try
 			{
 				signedbuffer = innerCAdES(buffer, pk, cert1);
-			}
-			catch (InvalidKeyException e)
-			{
-				Error error = new Error();
-				error.setCode(2203);
-				error.setDescription(e.getMessage());
-				toReturn.setError(error);
-				return toReturn;
-			}
-			catch (NoSuchAlgorithmException e)
-			{
-				Error error = new Error();
-				error.setCode(2204);
-				error.setDescription(e.getMessage());
-				toReturn.setError(error);
-				return toReturn;
-			}
-			catch (NoSuchProviderException e)
-			{
-				Error error = new Error();
-				error.setCode(2205);
-				error.setDescription(e.getMessage());
-				toReturn.setError(error);
-				return toReturn;
-			}
-			catch (SignatureException e)
-			{
-				Error error = new Error();
-				error.setCode(2206);
-				error.setDescription(e.getMessage());
-				toReturn.setError(error);
-				return toReturn;
 			}
 			catch (CertificateEncodingException e)
 			{
 				Error error = new Error();
 				error.setCode(2207);
-				error.setDescription(e.getMessage());
+				error.setDescription("Errore durante la codifica del certificato in fase di creazione della CAdES.");
 				toReturn.setError(error);
 				return toReturn;
 			}
@@ -553,7 +593,7 @@ public class PdfService
 			{
 				Error error = new Error();
 				error.setCode(2208);
-				error.setDescription(e.getMessage());
+				error.setDescription("Errore durante l'operazione di creazione della CAdES.");
 				toReturn.setError(error);
 				return toReturn;
 			}
@@ -561,7 +601,7 @@ public class PdfService
 			{
 				Error error = new Error();
 				error.setCode(2209);
-				error.setDescription(e.getMessage());
+				error.setDescription("Errore di tipo CMS durante l'operazione di creazione della CAdES.");
 				toReturn.setError(error);
 				return toReturn;
 			}
@@ -569,7 +609,7 @@ public class PdfService
 			{
 				Error error = new Error();
 				error.setCode(2210);
-				error.setDescription(e.getMessage());
+				error.setDescription("Errore durante il recupero della CAdES elaborata.");
 				toReturn.setError(error);
 				return toReturn;
 			}
@@ -577,7 +617,7 @@ public class PdfService
 		
         logger.info("Buffer firmato correttamente con dimensioni di " + signedbuffer.length + " byte(s)");
         
-        toReturn.setSignedPdf(signedbuffer);
+        toReturn.setSigned(signedbuffer);
         Error error = new Error();
 		error.setCode(0);
 		error.setDescription("OK");
@@ -607,7 +647,16 @@ public class PdfService
                 
 		sap.setCertificate(cert);
 		
-        sap.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
+		if(isLast)
+		{
+			logger.info("Su questa PAdES non sara' poi possibile aggiungere altre firme");
+			sap.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);	
+		}
+		else
+		{
+			sap.setCertificationLevel(PdfSignatureAppearance.NOT_CERTIFIED);	
+		}
+        
     	
 		ExternalSignature es = new PrivateKeySignature(pk, "SHA-256", "BC");
         ExternalDigest digest = new BouncyCastleDigest();
@@ -619,15 +668,10 @@ public class PdfService
 		return bos.toByteArray();
 	}
 	
-	private byte[] innerCAdES(byte[] buffer, PrivateKey pk, Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, CertificateEncodingException, OperatorCreationException, CMSException, IOException
+	private byte[] innerCAdES(byte[] buffer, PrivateKey pk, Certificate cert) throws CertificateEncodingException, OperatorCreationException, CMSException, IOException
 	{
 		String hash = "SHA256withRSA";
 		String provider = "BC";
-//		
-//		Signature signature = Signature.getInstance(hash, provider);
-//		
-//		signature.initSign(pk);
-//		signature.update(buffer);
 			
 		//Build CMS
         X509Certificate x509cert = (X509Certificate) cert;
@@ -657,8 +701,10 @@ public class PdfService
 	 */
 	private void activateLog() throws IOException
 	{
-		InputStream inputStream = this.getClass().getClassLoader()
-				.getResourceAsStream("/log4j.properties");
+		InputStream inputStream =this.getClass().getClassLoader()
+				.getResourceAsStream("log4j.properties");
+		
+		
 		Properties properties = new Properties();
 		properties.load(inputStream);
 		PropertyConfigurator.configure(properties);
