@@ -3,7 +3,7 @@ package it.land.test;
 import static org.junit.Assert.assertNotNull;
 import it.land.PdfService;
 import it.land.responses.IsValidResponse;
-import it.land.responses.SignedPdfResponse;
+import it.land.responses.SignedResponse;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -92,9 +92,9 @@ public class PdfServiceTest
 		
 		
 		
-		SignedPdfResponse response = service.sign(certname, pin, pdf);
+		SignedResponse response = service.signPdf(certname, pin, pdf);
 		
-		byte[] signed = response.getSignedPdf();
+		byte[] signed = response.getSigned();
 		
 		System.out.println("Code: "+response.getError().getCode());
 		
@@ -107,6 +107,81 @@ public class PdfServiceTest
 				System.out.println("Signed length: "+signed.length+" byte(s)");
 				
 				FileOutputStream fos = new FileOutputStream("data/signed.pdf");
+				
+				fos.write(signed);
+				
+				fos.flush();
+				
+				fos.close();
+			}
+			catch (FileNotFoundException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	
+	
+	@Test
+	public void testSignCadesMethod()
+	{
+		
+		
+		PdfService service = new PdfService();
+		
+		String certname = "data/test.p12";
+		
+		System.out.println("Esiste il file "+certname+"? "+new File(certname).exists());
+		
+		String pin = "password";
+		
+		byte[] pdf = null;
+		
+		String filename = "data/test.pdf";
+		
+		try
+		{
+			FileInputStream fis = new FileInputStream(new File(filename));
+			
+			System.out.println("Esiste il file "+filename+"? "+new File(filename).exists());
+			
+			
+			pdf = IOUtils.toByteArray(fis);
+		} catch (FileNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		SignedResponse response = service.signBuffer(certname, pin, pdf);
+		
+		byte[] signed = response.getSigned();
+		
+		System.out.println("Code: "+response.getError().getCode());
+		
+		System.out.println("Message: "+response.getError().getDescription());
+
+		if(response.getError().getCode() == 0)
+		{
+			try
+			{
+				System.out.println("Signed length: "+signed.length+" byte(s)");
+				
+				FileOutputStream fos = new FileOutputStream("data/signed.p7m");
 				
 				fos.write(signed);
 				
