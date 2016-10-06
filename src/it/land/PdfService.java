@@ -1,7 +1,11 @@
 package it.land;
 
 
+import it.land.pdf.PDFManager;
+import it.land.pdf.PDFManagerException;
+import it.land.pdf.form.Form;
 import it.land.responses.IsValidResponse;
+import it.land.responses.PdfManagerResponse;
 import it.land.responses.SignedResponse;
 
 import java.io.ByteArrayOutputStream;
@@ -27,8 +31,12 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.axis2.context.MessageContext;
 import org.apache.log4j.Logger;
@@ -77,6 +85,13 @@ public class PdfService
 	private boolean isCades = false;
 	
 	private boolean isLast = false;
+	
+	private enum PDFMODE
+	{
+		ADDFORMS,
+		FILLFORMS,
+		ADDATTACHMENT
+	};
 
 	public PdfService()
 	{
@@ -354,6 +369,24 @@ public class PdfService
 	}
 	
 	
+	public PdfManagerResponse addForms(byte[] buffer, Form[] forms)
+	{
+		
+		return innerOperation(PDFMODE.ADDFORMS, buffer, null, null, forms);
+	}
+	
+	
+	public PdfManagerResponse fillForms(byte[] buffer,  Form[] forms)
+	{
+		
+		return innerOperation(PDFMODE.FILLFORMS, buffer, null, null, forms);
+	}
+	
+	public PdfManagerResponse addAttachment(byte[] buffer,  byte[] attachment, String attachname)
+	{
+		
+		return innerOperation(PDFMODE.ADDATTACHMENT, buffer, attachment, attachname, null);
+	}
 	
 	private SignedResponse innerSign(String certname, String pin, byte[] buffer)
 	{
@@ -629,8 +662,6 @@ public class PdfService
 	}
 	
 	
-	
-	
 	private byte[] innerPAdES(byte[] buffer, PrivateKey pk, Certificate cert, Certificate[] chain) throws IOException, DocumentException, GeneralSecurityException
 	{
 		PdfReader reader = new PdfReader(buffer);
@@ -694,6 +725,129 @@ public class PdfService
 	}
 	
 	
+	
+	
+
+	private PdfManagerResponse innerOperation(PDFMODE mode, byte[] buffer, byte[] attachment, String attachname, Form[] forms)
+	{
+		PdfManagerResponse response = new PdfManagerResponse();
+		
+		PDFManager manager = null;
+		Error error = new Error();
+		try
+		{
+			manager = new PDFManager(buffer);
+		}
+		catch (PDFManagerException e)
+		{
+			error.setCode(1);
+			error.setDescription("Pdf non riconosciuto.");
+			Logger.getLogger(getClass()).error("Pdf non riconosciuto. " + e.getMessage());
+			
+
+			response.setError(error);
+			
+			return response;
+		}
+		
+		if(mode.equals(PDFMODE.ADDATTACHMENT))
+		{
+			try
+			{
+				
+				
+				manager.addAttachment(attachment, attachname);
+			}
+			catch (PDFManagerException e)
+			{
+				error.setCode(10);
+				error.setDescription("Inserimento allegato fallita.");
+				Logger.getLogger(getClass()).error("Inserimento allegato fallita. " + e.getMessage());
+				
+
+				response.setError(error);
+				
+				return response;
+			}
+			
+			
+		}
+		
+		
+		if(mode.equals(PDFMODE.ADDFORMS))
+		{
+			try
+			{
+				for(int page = 1; page <= manager.getNumberOfPages(); page++)
+				{
+		
+					float x = 300;
+					
+					float y = 50;
+					
+					float rotation = 0;
+					
+					for(Form form : forms)
+					{
+						manager.addForm("page_" + page + "_" + form.getName(), "", x, y, rotation, page);
+						
+						y = y + 30;
+					}
+				}
+			}
+			catch (PDFManagerException e)
+			{
+				error.setCode(11);
+				error.setDescription("Inserimento form fallita.");
+				Logger.getLogger(getClass()).error("Inserimento form fallita. " + e.getMessage());
+				
+
+				response.setError(error);
+				
+				return response;
+			}
+		}
+		
+		
+		if(mode.equals(PDFMODE.FILLFORMS))
+		{
+			try
+			{
+	
+				for(int page = 1; page <= manager.getNumberOfPages(); page++)
+				{
+		
+					
+					for(Form form : forms)
+					{	
+						manager.fillForm("page_" + page + "_" + form.getName(), form.getValue());
+					}
+				}
+			}
+			catch (PDFManagerException e)
+			{
+				error.setCode(12);
+				error.setDescription("Inserimento form fallita.");
+				Logger.getLogger(getClass()).error("Inserimento form fallita. " + e.getMessage());
+				
+				response.setError(error);
+				
+				return response;
+			}
+		}
+		
+		
+		error.setCode(0);
+		error.setDescription("OK");
+		
+		manager.closePdf();
+		
+		response.setUpdatedPdf(manager.getUpdatedPdf());
+		
+		response.setError(error);
+		
+		return response;
+	}
 	/**
 	 * Attiva il log della classe
 	 * 

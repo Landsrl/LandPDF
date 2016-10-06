@@ -4,32 +4,34 @@
  */
 package it.land.responses;
 
-
 import it.land.Error;
+
 /**
  * @author mcosta
  *
  */
-public class SignedPdfResponse
+public class PdfManagerResponse
 {
-	private byte[] signedPdf = null;
+
+	private byte[] updatedPdf = null;
+	
 	
 	private Error error = null;
 
 	/**
-	 * @return the signedPdf
+	 * @return the updatedPdf
 	 */
-	public byte[] getSignedPdf()
+	public byte[] getUpdatedPdf()
 	{
-		return signedPdf;
+		return updatedPdf;
 	}
 
 	/**
-	 * @param signedPdf the signedPdf to set
+	 * @param updatedPdf the updatedPdf to set
 	 */
-	public void setSignedPdf(byte[] signedPdf)
+	public void setUpdatedPdf(byte[] updatedPdf)
 	{
-		this.signedPdf = signedPdf;
+		this.updatedPdf = updatedPdf;
 	}
 
 	/**
@@ -47,4 +49,6 @@ public class SignedPdfResponse
 	{
 		this.error = error;
 	}
+	
+	
 }
