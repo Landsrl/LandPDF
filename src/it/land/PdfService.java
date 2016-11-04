@@ -2,6 +2,7 @@ package it.land;
 
 
 import it.land.pdf.PDFManager;
+import it.land.pdf.PDFManagerBean;
 import it.land.pdf.PDFManagerException;
 import it.land.pdf.form.Form;
 import it.land.responses.IsValidResponse;
@@ -90,7 +91,8 @@ public class PdfService
 	{
 		ADDFORMS,
 		FILLFORMS,
-		ADDATTACHMENT
+		ADDATTACHMENT,
+		ADDINFO
 	};
 
 	public PdfService()
@@ -372,20 +374,27 @@ public class PdfService
 	public PdfManagerResponse addForms(byte[] buffer, Form[] forms)
 	{
 		
-		return innerOperation(PDFMODE.ADDFORMS, buffer, null, null, forms);
+		return innerOperation(PDFMODE.ADDFORMS, buffer, null, null, forms, null);
 	}
 	
 	
 	public PdfManagerResponse fillForms(byte[] buffer,  Form[] forms)
 	{
 		
-		return innerOperation(PDFMODE.FILLFORMS, buffer, null, null, forms);
+		return innerOperation(PDFMODE.FILLFORMS, buffer, null, null, forms, null);
 	}
 	
 	public PdfManagerResponse addAttachment(byte[] buffer,  byte[] attachment, String attachname)
 	{
 		
-		return innerOperation(PDFMODE.ADDATTACHMENT, buffer, attachment, attachname, null);
+		return innerOperation(PDFMODE.ADDATTACHMENT, buffer, attachment, attachname, null, null);
+	}
+	
+	
+	public PdfManagerResponse addInfoDictonary(byte[] buffer,  PDFManagerBean bean)
+	{
+		
+		return innerOperation(PDFMODE.ADDINFO, buffer, null, null, null, bean);
 	}
 	
 	private SignedResponse innerSign(String certname, String pin, byte[] buffer)
@@ -728,7 +737,7 @@ public class PdfService
 	
 	
 
-	private PdfManagerResponse innerOperation(PDFMODE mode, byte[] buffer, byte[] attachment, String attachname, Form[] forms)
+	private PdfManagerResponse innerOperation(PDFMODE mode, byte[] buffer, byte[] attachment, String attachname, Form[] forms, PDFManagerBean bean)
 	{
 		PdfManagerResponse response = new PdfManagerResponse();
 		
@@ -829,6 +838,26 @@ public class PdfService
 				error.setCode(12);
 				error.setDescription("Inserimento form fallita.");
 				Logger.getLogger(getClass()).error("Inserimento form fallita. " + e.getMessage());
+				
+				response.setError(error);
+				
+				return response;
+			}
+		}
+		
+		
+		
+		if(mode.equals(PDFMODE.ADDINFO))
+		{
+			try
+			{
+				manager.addInfoDictonary(bean);
+			}
+			catch (PDFManagerException e)
+			{
+				error.setCode(13);
+				error.setDescription("Inserimento informazioni pdf fallita.");
+				Logger.getLogger(getClass()).error("Inserimento informazioni pdf fallita. " + e.getMessage());
 				
 				response.setError(error);
 				

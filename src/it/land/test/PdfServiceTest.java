@@ -2,7 +2,9 @@ package it.land.test;
 
 import static org.junit.Assert.assertNotNull;
 import it.land.PdfService;
+import it.land.pdf.PDFManagerBean;
 import it.land.responses.IsValidResponse;
+import it.land.responses.PdfManagerResponse;
 import it.land.responses.SignedResponse;
 
 import java.io.File;
@@ -200,6 +202,72 @@ public class PdfServiceTest
 				e.printStackTrace();
 			}
 		}
+		
+	}
+	
+	
+	
+	@Test
+	public void testTestMethodAddInfoDictornary()
+	{
+		String pdf = "data/test.pdf";//"C:\\Users\\rbracci\\Desktop\\BUDGET-2013-BUD.pdf";
+		byte[] bytes = null;
+		try
+		{
+			FileInputStream fis = new FileInputStream(new File(pdf));
+			bytes = IOUtils.toByteArray(fis);
+		} catch (FileNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		PdfService service = new PdfService();
+		PDFManagerBean bean = new PDFManagerBean();
+		
+		bean.setAuthor("Author Land");
+		bean.setCreator("Il presente documento e stato creato con tecnologia SecurePaper DOU - http://www.securepaper.it - LAND S.r.l. - Via di Affogalasino, 40 00148 ROMA - info@land.it ");
+		bean.setKeywords("Keywords bla bla bla");
+		bean.setProducer("Producer Land");
+		bean.setSubject("Subject bla bla bla");
+		bean.setTitle("Title bla");
+		
+		PdfManagerResponse response = service.addInfoDictonary(bytes, bean );
+		
+		if(response.getError().getCode() == 0)
+		{
+			System.out.println("Inserimento info con successo. Salvato su data/info.pdf");
+			byte[] result = response.getUpdatedPdf();
+			
+			try
+			{
+				FileOutputStream fos = new FileOutputStream("data/info.pdf");
+				fos.write(result);
+				fos.flush();
+				fos.close();
+			}
+			catch (FileNotFoundException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			System.err.println("Inserimento info fallita.");
+		}
+		
+		
+
 		
 	}
 

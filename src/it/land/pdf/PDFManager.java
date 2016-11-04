@@ -8,6 +8,7 @@ package it.land.pdf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.codec.binary.Hex;
@@ -126,28 +127,9 @@ public class PDFManager
 	public void addForm(String labelform, String labeltext, float x, float y, float rotation, int page) throws PDFManagerException
 	{
 
-		//PdfWriter writer = stamper.getWriter();
-		
-//		TextField file = new TextField(
-//											stamper.getWriter(), 
-//											new Rectangle(
-//															36, 
-//															500, 
-//															360, 
-//															530),
-//														 
-//											"myfile");
-//        file.setOptions(TextField.FILE_SELECTION);
+
         try
 		{
-//			PdfFormField upload = file.getTextField();
-//			upload.setAdditionalActions(
-//											PdfName.U,
-//											PdfAction.javaScript(
-//												"this.getField('myfile').browseForFileToSubmit();"
-//												+ "this.getField('mytitle').setFocus();",
-//											stamper.getWriter()));
-//			stamper.addAnnotation(upload, 1);
         	
         	
         	//la lunghezza della text field e' data al punto iniziale "x" + i pixel di lunghezza che gli si vuole dare
@@ -155,6 +137,8 @@ public class PDFManager
         	
         	//l'altezza della text field e' data al punto iniziale "y" + i pixel di altezza che gli si vuole dare
         	float height = y + TEXTFIELD_HEIGHT;
+        	
+        	Logger.getLogger(getClass()).debug("Aggiungo il form " + labelform + " alla posizione x=" + x + " y=" + y + " w=" + width + " h=" + height);
         	
 			TextField formfield = new TextField(
 												stamper.getWriter(), 
@@ -190,6 +174,8 @@ public class PDFManager
 	{
 		try
 		{
+			Logger.getLogger(getClass()).debug("Inserisco nel form " + formname + " il valore " + formvalue);
+			
 			AcroFields form = stamper.getAcroFields();
 		    boolean isFilled = form.setField(formname, formvalue);
 		    form.setFieldProperty(formname, "setfflags", PdfFormField.FF_READ_ONLY, null);
@@ -209,6 +195,28 @@ public class PDFManager
 		}
        
 
+	}
+	
+	
+	public void addInfoDictonary(PDFManagerBean bean) throws PDFManagerException
+	{
+		if(bean == null)
+		{
+			throw new PDFManagerException("Nessun oggetto contenente le informazioni del pdf passato in input.");
+		}
+		
+		Map<String, String> info = reader.getInfo();
+		
+		info.put("Title", bean.getTitle());
+		info.put("Subject", bean.getSubject());
+		info.put("Keywords", bean.getKeywords());
+		info.put("Creator", bean.getCreator());
+		info.put("Author", bean.getAuthor());
+
+		
+		stamper.setMoreInfo(info);
+
+		
 	}
 	
 	
