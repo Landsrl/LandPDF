@@ -19,8 +19,7 @@ public class PDFManagerBean
 	private String keywords = "";
 	
 	private String creator = "";
-	
-	private String producer = "";
+
 
 	/**
 	 * @return the author
@@ -101,22 +100,5 @@ public class PDFManagerBean
 	{
 		this.creator = creator;
 	}
-
-	/**
-	 * @return the producer
-	 */
-	public String getProducer()
-	{
-		return producer;
-	}
-
-	/**
-	 * @param producer the producer to set
-	 */
-	public void setProducer(String producer)
-	{
-		this.producer = producer;
-	}
-	
 	
 }

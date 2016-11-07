@@ -229,12 +229,11 @@ public class PdfServiceTest
 		PdfService service = new PdfService();
 		PDFManagerBean bean = new PDFManagerBean();
 		
-		bean.setAuthor("Author Land");
-		bean.setCreator("Il presente documento e stato creato con tecnologia SecurePaper DOU - http://www.securepaper.it - LAND S.r.l. - Via di Affogalasino, 40 00148 ROMA - info@land.it ");
-		bean.setKeywords("Keywords bla bla bla");
-		bean.setProducer("Producer Land");
-		bean.setSubject("Subject bla bla bla");
-		bean.setTitle("Title bla");
+		bean.setAuthor("Firma Elettronica di Test  - Nome Utente Finale");
+		bean.setCreator("LAND S.r.l. - Via di Affogalasino, 40 00148 ROMA - info@land.it");
+		bean.setKeywords("Il presente documento e stato creato con tecnologia SecurePaper DOU - http://www.securepaper.it");
+		bean.setSubject("Documento FEA");
+		bean.setTitle("FEA");
 		
 		PdfManagerResponse response = service.addInfoDictonary(bytes, bean );
 		
